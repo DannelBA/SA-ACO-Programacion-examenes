@@ -73,6 +73,20 @@ def agrupar_examenes_por_estudiante(matriculas):
         resultado[estudiante].append(examen)
     return resultado
 
+def agrupar_estudiantes_por_examen(matriculas):
+    """
+    Convierte la lista de matrículas [('EST001','E35'), ('EST002','E35'), ...]
+    en un diccionario: {'E35': {'EST001', 'EST002', ...}, ...}
+    Se usa un set (conjunto) en vez de lista porque no nos interesa el
+    orden, solo saber "quiénes son" sin repetidos.
+    """
+    resultado = {}
+    for estudiante, examen in matriculas:
+        if examen not in resultado:
+            resultado[examen] = set()
+        resultado[examen].add(estudiante)
+    return resultado
+
 def cargar_instancia(ruta_excel):
     """
     Abre el Excel y devuelve TODO junto en un solo diccionario:
@@ -91,7 +105,10 @@ def cargar_instancia(ruta_excel):
         "aulas": cargar_aulas(libro["Aulas"]),
         "matriculas": matriculas,
         "examenes_por_estudiante": agrupar_examenes_por_estudiante(matriculas),
+        "estudiantes_por_examen": agrupar_estudiantes_por_examen(matriculas),
     }
+    
+
 
 if __name__ == "__main__":
     datos = cargar_instancia("datos/instancia_examenes_tema02.xlsx")
@@ -100,3 +117,5 @@ if __name__ == "__main__":
     print("Franjas:", len(datos["franjas"]))
     print("Aulas:", len(datos["aulas"]))
     print("Matrículas:", len(datos["matriculas"]))
+    print("\nEstudiantes de E01:", datos["estudiantes_por_examen"]["E01"])
+    print("Cantidad:", len(datos["estudiantes_por_examen"]["E01"]))
