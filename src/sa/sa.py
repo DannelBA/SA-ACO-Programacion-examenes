@@ -1,9 +1,11 @@
 import sys
 import os
+sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import math
 import random
+import time
 
 from cargar_datos import cargar_instancia
 from funcion_objetivo import calcular_costo
@@ -15,12 +17,15 @@ def enfriamiento_simulado(datos, T_inicial, alpha, T_final, iteraciones_max, sem
     if semilla is not None:
         random.seed(semilla)
     
+    inicio = time.perf_counter()  # Marca el tiempo de inicio
+    
     # Paso 1: solución inicial
     solucion_actual = construir_solucion_aleatoria(datos)
     costo_actual = calcular_costo(solucion_actual, datos)["costo_total"]
 
     mejor_solucion = solucion_actual
     mejor_costo = costo_actual
+    iteracion_mejor = 0  # En qué iteración se encontró la mejor
 
     T = T_inicial
     iteracion = 0
@@ -44,25 +49,34 @@ def enfriamiento_simulado(datos, T_inicial, alpha, T_final, iteraciones_max, sem
         if costo_actual < mejor_costo:
             mejor_solucion = solucion_actual
             mejor_costo = costo_actual
+            iteracion_mejor = iteracion  # Actualiza el récord
 
         # Paso 5: bajar la temperatura
         T = T * alpha
         iteracion += 1
 
-    return mejor_solucion, mejor_costo, iteracion
+    tiempo_ejecucion = time.perf_counter() - inicio 
+        
+    return {
+        "mejor_solucion": mejor_solucion,
+        "mejor_costo": mejor_costo,
+        "iteraciones_totales": iteracion,
+        "iteracion_mejor": iteracion_mejor,
+        "tiempo_ejecucion": tiempo_ejecucion,
+    }
 
 
 if __name__ == "__main__":
     datos = cargar_instancia("datos/instancia_examenes_tema02.xlsx")
 
-    mejor_solucion, mejor_costo, iteracion_final = enfriamiento_simulado(
+    resultado = enfriamiento_simulado(
         datos, T_inicial=1000, alpha=0.995, T_final=1, iteraciones_max=2000, semilla=42
     )
 
-    resultado = calcular_costo(mejor_solucion, datos)
+    detalle_costo = calcular_costo(resultado["mejor_solucion"], datos)
 
-    print("Iteraciones ejecutadas:", iteracion_final)
-    print("Mejor costo encontrado:", mejor_costo)
-    print("H:", resultado["H"], "-", resultado["detalle_H"])
-    print("C_día:", resultado["C_dia"])
-    print("P_libres:", resultado["P_libres"])
+    print("Mejor costo:", resultado["mejor_costo"])
+    print("Iteración donde se encontró:", resultado["iteracion_mejor"])
+    print("Iteraciones totales:", resultado["iteraciones_totales"])
+    print("Tiempo (s):", resultado["tiempo_ejecucion"])
+    print("H:", detalle_costo["H"])
