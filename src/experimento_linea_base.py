@@ -136,7 +136,7 @@ if __name__ == "__main__":
         "alpha": 1.0,
         "beta": 2.0,
         "rho": 0.9,
-        "Q": 10,
+        "Q": 1000000,
     }
 
     print("\n\n=== ACO - Línea base ===")
